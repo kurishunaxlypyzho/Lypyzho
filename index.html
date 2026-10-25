@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Medical Study Companion - Blok Endokrin (Tiroid & Antitiroid)</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #34d399;
+            --accent-red: #f87171;
+            --accent-yellow: #fbbf24;
+            --accent-purple: #c084fc;
+            --border-color: #334155;
+            --hover-bg: #334155;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .light-mode {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent-blue: #0284c7;
+            --accent-green: #059669;
+            --accent-red: #dc2626;
+            --accent-yellow: #d97706;
+            --accent-purple: #9333ea;
+            --border-color: #e2e8f0;
+            --hover-bg: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Progress Bar */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+            width: 0%;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: 280px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem 1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: var(--hover-bg);
+            color: var(--accent-blue);
+        }
+
+        .theme-toggle-btn {
+            margin-top: auto;
+            padding: 0.6rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Main Content */
+        main {
+            flex-grow: 1;
+            padding: 2rem 3rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header.doc-header {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .doc-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .meta-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-hy { background: rgba(248, 113, 113, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+        .badge-mm { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+        .badge-ct { background: rgba(251, 191, 36, 0.2); color: var(--accent-yellow); border: 1px solid var(--accent-yellow); }
+        .badge-hd { background: rgba(192, 132, 252, 0.2); color: var(--accent-purple); border: 1px solid var(--accent-purple); }
+        .badge-cp { background: rgba(52, 211, 153, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.4rem;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin: 1.2rem 0 0.6rem 0;
+            color: var(--text-primary);
+        }
+
+        p, li {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+        }
+
+        /* Cards & Collapsibles */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .collapsible-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .collapsible-body {
+            display: none;
+            padding-top: 1rem;
+            margin-top: 0.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .collapsible-body.open {
+            display: block;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: var(--hover-bg);
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
+
+        tr:hover {
+            background-color: rgba(255,255,255,0.02);
+        }
+
+        /* Flowchart / Pathway diagram */
+        .pathway {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px dashed var(--accent-blue);
+            margin: 1rem 0;
+        }
+
+        .pathway-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .pathway-arrow {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        /* Quiz Interactive */
+        .quiz-option {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-blue);
+            background: var(--hover-bg);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--accent-green) !important;
+            background: rgba(52, 211, 153, 0.15) !important;
+            color: var(--accent-green);
+        }
+
+        .quiz-option.wrong {
+            border-color: var(--accent-red) !important;
+            background: rgba(248, 113, 113, 0.15) !important;
+            color: var(--accent-red);
+        }
+
+        .explanation {
+            display: none;
+            background: var(--hover-bg);
+            border-left: 4px solid var(--accent-blue);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .explanation.visible {
+            display: block;
+        }
+
+        /* Quick Review Banner */
+        .quick-review-box {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(52, 211, 153, 0.1));
+            border: 1px solid var(--accent-blue);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            aside { width: 100%; height: auto; position: relative; }
+            main { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="progress-container"><div id="progress-bar"></div></div>
+
+    <aside>
+        <div class="brand">
+            <span>🩺</span>
+            <span>MedCompanion Endokrin</span>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Cari topik / obat..." onkeyup="filterContent()">
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="#quick-review">⚡ Quick 5-Min Review</a></li>
+            <li><a href="#skdi">🎯 SKDI & Learning Priorities</a></li>
+            <li><a href="#biosintesis">🧪 Biosintesis Hormon Tiroid</a></li>
+            <li><a href="#hipotiroidisme">🥶 Hipotiroidisme & Terapi</a></li>
+            <li><a href="#hipertiroidisme">🔥 Hipertiroidisme & Antitiroid</a></li>
+            <li><a href="#tabel-komparasi">📊 Tabel Komparasi Obat</a></li>
+            <li><a href="#common-traps">⚠️ Common Traps & Pearls</a></li>
+            <li><a href="#quiz">📝 Latihan Soal Interaktif</a></li>
+        </ul>
+
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+            <span id="theme-icon">🌙</span> Dark / Light Mode
+        </button>
+    </aside>
+
+    <main>
+        <header class="doc-header">
+            <h1>Interactive Medical Study Companion</h1>
+            <p style="color: var(--text-secondary); font-size: 1.1rem;">Blok Endokrin: Farmakologi Tiroid & Antitiroid</p>
+            <div class="meta-badges">
+                <span class="badge badge-hy">🔥 High Yield</span>
+                <span class="badge badge-mm">🧠 Must Memorize</span>
+                <span class="badge badge-ct">⚠️ Common Traps</span>
+                <span class="badge badge-hd">👨‍🏫 Highlight Dosen</span>
+                <span class="badge badge-cp">🩺 Clinical Pearl</span>
+            </div>
+        </header>
+
+        <!-- ⚡ QUICK REVIEW -->
+        <section id="quick-review">
+            <div class="quick-review-box">
+                <h2>⚡ IF YOU ONLY HAVE 5 MINUTES</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div class="card">
+                        <h4 style="color: var(--accent-blue);">🥶 HIPOTIROIDISME</h4>
+                        <ul style="font-size: 0.88rem; padding-left: 1.2rem; margin-top: 0.5rem;">
+                            <li><strong>Trias/Lab Utama:</strong> T4 Bebas Rendah, TSH Tinggi (Hipotiroid Primer).</li>
+                            <li><strong>Lini Utama (DOC):</strong> Na-Levotiroksin (T4), paruh paruh ~7 hari, 1x/hari perut kosong. Dosis ~1.6 mcg/kgBB/hari.</li>
+                            <li><strong>Liotironin (T3):</strong> Onset cepat, hanya untuk koma miksedema (kombinasi). Bukan terapi rutin.</li>
+                            <li><strong>Kretinisme:</strong> Hipotiroid bawaan. Cebol, mental terganggu, perut buncit, lidah membesar. Terapi HARUS segera setelah lahir.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4 style="color: var(--accent-red);">🔥 HIPERTIROIDISME</h4>
+                        <ul style="font-size: 0.88rem; padding-left: 1.2rem; margin-top: 0.5rem;">
+                            <li><strong>Lini 1 Antitiroid:</strong> Metimazol (1x/hari, potensi 10x PTU) & PTU (3x/hari).</li>
+                            <li><strong>Kehamilan Trimester 1:</strong> GUNAKAN PTU (ikatan albumin tinggi, cegah teratogenisitas metimazol).</li>
+                            <li><strong>Bedanya PTU:</strong> Menghambat TPO DAN menghambat konversi perifer T4 → T3. Metimazol TIDAK hambat perifer.</li>
+                            <li><strong>Efek Samping Bahaya:</strong> Agranulositosis (demam + nyeri tenggorokan). Minta pasien STOP obat & cek darah tepi!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🎯 SKDI & PRIORITAS -->
+        <section id="skdi">
+            <h2>🎯 SKDI Mapping & Priority Checklist</h2>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Diagnosis / Topik</th>
+                            <th>Tingkat Kompetensi SKDI</th>
+                            <th>Target Kedalaman & Urgen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Hipotiroidisme</strong></td>
+                            <td><span class="badge badge-hy">3A / 4A</span></td>
+                            <td>Mengenali klinis, interpretasi TSH/FT4, meresepkan Levotiroksin, pemantauan 6-8 minggu.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Penyakit Graves / Hipertiroidisme</strong></td>
+                            <td><span class="badge badge-hy">3A / 4A</span></td>
+                            <td>Mengenali trias Graves, membedakan PTU vs Metimazol, penanganan efek samping agranulositosis.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Krisis Tiroid (Thyroid Storm)</strong></td>
+                            <td><span class="badge badge-ct">3B</span></td>
+                            <td>Kegawatdaruratan: kombinasi PTU/Metimazol, Beta-blocker, Glukokortikoid, Yodida.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Koma Miksedema</strong></td>
+                            <td><span class="badge badge-ct">3B</span></td>
+                            <td>Kegawatdaruratan hipotiroid berat: T4/T3 parenteral, resusitasi cairan, steroid.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 🧪 BIOSINTESIS HORMON TIROID -->
+        <section id="biosintesis">
+            <h2>🧪 Biosintesis & Fisiologi Hormon Tiroid</h2>
+            <div class="card">
+                <p>Kelenjar tiroid dewasa berbobot 25–30 gram, menghasilkan Tiroksin (T4) dan Triyodotironin (T3) dalam ikatan tiroglobulin (MR 670.000).</p>
+                
+                <h3>Alur 4 Tahap Biosintesis (👨‍🏫 HIGHLIGHT DOSEN):</h3>
+                <div class="pathway">
+                    <div class="pathway-step">
+                        <strong>Tahap 1: Uptake Iodida</strong>
+                        <span>Transpor aktif via NIS (Sodium-Iodide Symporter). Kadar di tiroid 20–50x plasma (dapat >100x). Dihambat oleh Perklorat & Tiosianat.</span>
+                    </div>
+                    <div class="pathway-arrow">↓</div>
+                    <div class="pathway-step">
+                        <strong>Tahap 2: Oksidasi & Iodinasi</strong>
+                        <span>Iodida dioksidasi jadi Iodium oleh enzim Tiroperoksidase (TPO). Iodium mengiodinasi gugus tirosil tiroglobulin → membentuk MIT (Monoiodotirosin) & DIT (Diiodotirosin). Dihambat oleh Tioamid (PTU & Metimazol).</span>
+                    </div>
+                    <div class="pathway-arrow">↓</div>
+                    <div class="pathway-step">
+                        <strong>Tahap 3: Coupling (Penggabungan)</strong>
+                        <span>MIT + DIT → T3; DIT + DIT → T4. Dipengaruhi TPO dan TSH. Normal T4:T3 = 4:1. Pada defisiensi yodium rasio terbalik 1:3.</span>
+                    </div>
+                    <div class="pathway-arrow">↓</div>
+                    <div class="pathway-step">
+                        <strong>Tahap 4: Sekresi & Konversi Perifer</strong>
+                        <span>Proteolisis tiroglobulin membebaskan T4 & T3 ke sirkulasi darah. 80% T3 aktif disintesis di jaringan perifer (hepar & ginjal) via enzim deiodinase.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🥶 HIPOTIROIDISME & TERAPI -->
+        <section id="hipotiroidisme">
+            <h2>🥶 Hipotiroidisme & Terapi Tiroid Eksogen</h2>
+            
+            <div class="card">
+                <h3>1. Gambaran Klinis & Bentuk Penyakit</h3>
+                <ul>
+                    <li><strong>Kretinisme (Bawaan):</strong> Atiroid atau defisiensi yodium ibu. Pertumbuhan cebol, perut buncit (tonus otot abdominal berkurang), lidah membesar, gangguan mental permanen jika tidak diobati segera setelah lahir.</li>
+                    <li><strong>Juvenile Mixedema:</strong> Pertumbuhan fisik/gigi awal normal, proses berpikir agak lambat, tanpa retardasi mental berat.</li>
+                    <li><strong>Miksudem Dewasa (Penyakit Gull):</strong> BMR rendah, intoleransi dingin, bicara lambat, suara serak, kulit tebal/kering, rambut rontok (sepertiga luar alis tipis), edema periorbital, konstipasi, bradikardi, pembesaran jantung.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>2. Sediaan Hormon Tiroid Eksogen</h3>
+                
+                <div class="collapsible-card">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <span>💊 Na-Levotiroksin (T4) — PILIHAN UTAMA (DOC)</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="collapsible-body open">
+                        <ul>
+                            <li><strong>Mekanisme:</strong> Pro-hormon T4 sintetis yang dikonversi menjadi T3 aktif di jaringan perifer.</li>
+                            <li><strong>Keunggulan:</strong> Stabilitas tinggi, waktu paruh panjang (~7 hari), kadar plasma konstan dengan pemberian 1x sehari.</li>
+                            <li><strong>Dosis:</strong> Dewasa muda tanpa komorbid cardiac: ~1.6 mcg/kgBB/hari. Lansia / PJK: Mulai 12.5–25 mcg/hari, titrasi perlahan.</li>
+                            <li><strong>Aturan Minum:</strong> Perut kosong (30-60 menit sebelum sarapan).</li>
+                            <li><strong>Interaksi Obat:</strong> Antasida, simetidin, kalsium, besi mengurangi absorpsi intestinal.</li>
+                            <li><strong>Pemantauan:</strong> Evaluasi kadar TSH serum 6–8 minggu setelah pengubahan dosis.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="collapsible-card" style="margin-top: 1rem;">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <span>⚡ Liotironin (T3) — ONSET CEPAT / KHUSUS DARURAT</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="collapsible-body">
+                        <ul>
+                            <li><strong>Mekanisme:</strong> Hormon T3 aktif langsung tanpa butuh konversi. Onset sangat cepat, waktu paruh pendek.</li>
+                            <li><strong>Indikasi Utama:</strong> Koma miksedema (pemberian IV/kombinasi di RS).</li>
+                            <li><strong>Kelemahan:</strong> Risiko kardiotoksisitas tinggi (aritmia, palpitasi), puncak kadar fluktuatif. TIDAK untuk terapi pemeliharaan rutin.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🔥 HIPERTIROIDISME & ANTITIROID -->
+        <section id="hipertiroidisme">
+            <h2>🔥 Hipertiroidisme & Obat Antitiroid</h2>
+
+            <div class="card">
+                <h3>1. Etiologi & Gejala Klinis</h3>
+                <p>Kelebihan hormon tiroid akibat Penyakit Graves (autoimun), Gondok Noduler Toksik, atau Adenoma Tiroid.</p>
+                <p><strong>Gejala:</strong> Intoleransi panas, kulit lembab/berkeringat, palpitasi, hipertensi sistolik, tremor halus, gelisah, insomnia, weight loss meskipun appetite naik, diare, eksoftalmus (Graves).</p>
+            </div>
+
+            <div class="card">
+                <h3>2. Klasifikasi Obat Antitiroid</h3>
+
+                <div class="collapsible-card">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <span>🧬 Golongan Tioamid: Propiltiourasil (PTU) vs Metimazol (MMI)</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="collapsible-body open">
+                        <p><strong>Mekanisme Aksi Utama:</strong> Menghambat enzim tiroperoksidase (TPO) sehingga menghambat oksidasi iodida dan coupling iodotirosil.</p>
+                        <p><strong>Penting (Beda Mekanisme):</strong> PTU menghambat deiodinasi perifer T4 → T3, sedangkan Metimazol TIDAK menghambat deiodinasi perifer.</p>
+                        <table style="margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Metimazol (MMI)</th>
+                                    <th>Propiltiourasil (PTU)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Potensi</strong></td>
+                                    <td>10x lebih kuat dari PTU</td>
+                                    <td>Standar (10x lebih rendah)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ikatan Albumin</strong></td>
+                                    <td>Bebas (rendah ikatan)</td>
+                                    <td>Tinggi (80–90% terikat albumin)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Dosis & Frekuensi</strong></td>
+                                    <td>15–30 mg/hari (1x sehari)</td>
+                                    <td>300 mg/hari terbagi (3x sehari)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Kehamilan Trimester 1</strong></td>
+                                    <td>Hindari (risiko aplasia cutis)</td>
+                                    <td><strong>Pilihan Utama (DOC)</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Hambat Perifer T4→T3</strong></td>
+                                    <td>❌ Tidak ada</td>
+                                    <td>✅ <strong>ADA</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="margin-top: 1rem; background: rgba(248, 113, 113, 0.1); padding: 0.8rem; border-left: 4px solid var(--accent-red); border-radius: 4px;">
+                            <strong>⚠️ Efek Samping Kritis Agranulositosis:</strong> Timbul pada 0.1-0.5% pasien. Gejala berupa demam dan sore throat. Pasien harus menghentikan obat segera dan diperiksa leukosit total & hitung jenis!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible-card" style="margin-top: 1rem;">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <span>🚫 Penghambat Ion Yodida & Larutan Yodida</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="collapsible-body">
+                        <ul>
+                            <li><strong>Penghambat Ion (Perklorat, Tiosianat):</strong> Penghambatan kompetitif NIS. Jarang dipakai karena risiko anemia aplastik.</li>
+                            <li><strong>Yodida Dosis Farmakologis (Lugol / NaI / KI):</strong> Menghambat proteolisis tiroglobulin (pelepasan hormon tiroid terhenti sementara). Digunakan 10 hari <em>pra-operasi tiroidektomi</em> untuk mengurangi vaskularitas kelenjar tiroid. Efek samping: <em>Yodisme</em> (rasa logam, iritasi mukosa).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="collapsible-card" style="margin-top: 1rem;">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <span>☢️ Yodium Radioaktif (131-I) & Terapi Adjuvan</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="collapsible-body">
+                        <ul>
+                            <li><strong>Yodium Radioaktif (131-I):</strong> Memancarkan sinar beta (destruksi folikel tiroid lokal). Kontraindikasi mutlak pada wanita hamil dan menyusui.</li>
+                            <li><strong>Beta-Blocker (Propranolol):</strong> Mengontrol gejala hiperadrenergik (palpitasi, tremor). Dosis tinggi Propranolol juga menghambat konversi T4 → T3.</li>
+                            <li><strong>Glukokortikoid (Deksametason):</strong> Digunakan pada Thyroid Storm dan oftalmopati Graves.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 📊 TABEL KOMPARASI OBAT -->
+        <section id="tabel-komparasi">
+            <h2>📊 Tabel Komparasi Farmakoterapi Tiroid</h2>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Obat</th>
+                            <th>Mekanisme Aksi Utama</th>
+                            <th>Indikasi Utama</th>
+                            <th>Efek Samping / Traps</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Levotiroksin (T4)</strong></td>
+                            <td>Agonis reseptor tiroid (pro-hormon)</td>
+                            <td>Hipotiroidisme primer & sekunder (Lini 1)</td>
+                            <td>Hipertiroidisme iatrogenik jika overdosis.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Liotironin (T3)</strong></td>
+                            <td>Agonis reseptor tiroid aktif langsung</td>
+                            <td>Koma Miksedema (Kedaruratan)</td>
+                            <td>Risiko kardiotoksisitas & aritmia tinggi.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Metimazol</strong></td>
+                            <td>Menghambat enzim Tiroperoksidase (TPO)</td>
+                            <td>Hipertiroidisme Graves (Dewasa/T2-3 Hamil)</td>
+                            <td>Agranulositosis, teratogenik T1 (aplasia cutis).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Propiltiourasil (PTU)</strong></td>
+                            <td>Menghambat TPO & konversi perifer T4→T3</td>
+                            <td>Hipertiroidisme Trimester 1 Kehamilan & Storm</td>
+                            <td>Agranulositosis, hepatotoksisitas.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Larutan Lugol / KI</strong></td>
+                            <td>Menghambat proteolisis tiroglobulin</td>
+                            <td>Persiapan pra-bedah tiroidektomi (10 hari)</td>
+                            <td>Yodisme, escape phenomenon.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Propranolol</strong></td>
+                            <td>Antagonis reseptor beta-1 & beta-2 adrenergik</td>
+                            <td>Kontrol simptomatik tremor/palpitasi & Storm</td>
+                            <td>Bronkospasme pada pasien asma.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ⚠️ COMMON TRAPS & PEARLS -->
+        <section id="common-traps">
+            <h2>⚠️ Common Traps & Exam Pearls</h2>
+            <div class="card">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="border-left: 4px solid var(--accent-yellow); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-yellow);">⚠️ TRAP 1: Evaluasi Lab TSH pada Terapi Antitiroid</h4>
+                        <p>Pada awal terapi antitiroid (Metimazol/PTU), kadar TSH serum dapat tetap tersupresi selama berminggu-minggu hingga berbulan-bulan meskipun kadar T3/T4 bebas sudah normal. Jangan menaikkan dosis antitiroid berdasarkan TSH awal; gunakan FT4/FT3!</p>
+                    </div>
+                    <div style="border-left: 4px solid var(--accent-red); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-red);">⚠️ TRAP 2: Pemilihan Obat Antitiroid pada Ibu Hamil</h4>
+                        <p>Trimester 1 Kehamilan WAJIB PTU (karena ikatan albumin tinggi, meminimalkan efek teratogenik Metimazol). Trimester 2 dan 3 dapat dipindahkan ke Metimazol untuk menghindari risiko hepatotoksisitas berat PTU.</p>
+                    </div>
+                    <div style="border-left: 4px solid var(--accent-green); padding-left: 1rem;">
+                        <h4 style="color: var(--accent-green);">🩺 CLINICAL PEARL: Demam + Sore Throat pada Pasien Antitiroid</h4>
+                        <p>Jika pasien dalam terapi PTU/Metimazol mengeluhkan demam dan nyeri tenggorokan, tindakan pertama adalah SEGERA hentikan obat dan lakukan pemeriksaan darah lengkap (hitung jenis leukosit) untuk menyingkirkan agranulositosis.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 📝 LATIHAN SOAL INTERAKTIF -->
+        <section id="quiz">
+            <h2>📝 Latihan Soal Interaktif (Ujian Blok)</h2>
+            <p style="margin-bottom: 1rem; color: var(--text-secondary);">Seluruh pilihan jawaban telah divalidasi dengan jumlah kalimat setara untuk mencegah guessing pattern.</p>
+
+            <!-- SOAL 1 -->
+            <div class="card" id="q1">
+                <h4>Soal 1: Pemilihan Antitiroid pada Kehamilan</h4>
+                <p style="margin: 0.5rem 0 1rem 0;">Seorang wanita berusia 28 tahun yang sedang hamil usia gestasi 8 minggu datang ke poliklinik dengan keluhan sering berdebar-debar dan tidak tahan udara panas. Pemeriksaan laboratorium menunjukkan kadar TSH tersupresi dan FT4 meningkat. Dokter memutuskan untuk memberikan terapi antitiroid oral. Manakah penatalaksanaan yang paling tepat untuk pasien ini?</p>
+                
+                <div class="quiz-option" onclick="checkAnswer(this, 'q1', false)">
+                    <span>A.</span>
+                    <span>Pasien hamil trimester pertama dengan penyakit Graves dianjurkan menggunakan metimazol karena memiliki ikatan protein plasma yang sangat kuat.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q1', true)">
+                    <span>B.</span>
+                    <span>Pasien hamil trimester pertama dengan penyakit Graves dianjurkan menggunakan propiltiourasil untuk meminimalkan risiko teratogenik metimazol.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q1', false)">
+                    <span>C.</span>
+                    <span>Pasien hamil trimester pertama dengan penyakit Graves dianjurkan menggunakan yodium radioaktif untuk menghancurkan sel tiroid secara permanen.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q1', false)">
+                    <span>D.</span>
+                    <span>Pasien hamil trimester pertama dengan penyakit Graves dianjurkan menggunakan larutan Lugol dosis tinggi sebagai terapi tunggal jangka panjang.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q1', false)">
+                    <span>E.</span>
+                    <span>Pasien hamil trimester pertama dengan penyakit Graves dianjurkan menggunakan liotironin untuk menekan kadar TSH serum hingga batas normal.</span>
+                </div>
+
+                <div class="explanation" id="exp-q1">
+                    <p><strong>✅ CORRECT ANSWER: B</strong></p>
+                    <p><strong>🧠 EXPLANATION:</strong> Pada kehamilan trimester pertama (organogenesis), Propiltiourasil (PTU) merupakan pilihan utama karena 80–90% PTU terikat pada albumin plasma sehingga transfer plasenta rendah. Metimazol pada trimester pertama berisiko menyebabkan teratogenisitas seperti aplasia cutis kongenital dan atresia koana.</p>
+                    <p><strong>❌ WHY THE OTHERS ARE WRONG:</strong> A salah karena Metimazol tidak terikat kuat dengan protein plasma. C salah karena yodium radioaktif kontraindikasi mutlak pada wanita hamil. D salah karena Lugol hanya untuk pra-bedah/krisis. E salah karena Liotironin adalah pengganti tiroid pada hipotiroid berat.</p>
+                    <p><strong>💡 EXAM PEARL:</strong> Trimester 1 = PTU (mencegah teratogenik MMI). Trimester 2-3 = Metimazol (mencegah hepatotoksisitas PTU).</p>
+                </div>
+            </div>
+
+            <!-- SOAL 2 -->
+            <div class="card" id="q2">
+                <h4>Soal 2: Perbedaan Farmakodinamik Tioamid</h4>
+                <p style="margin: 0.5rem 0 1rem 0;">Seorang mahasiswa kedokteran sedang mempelajari perbedaan mekanisme aksi antara sediaan obat antitiroid propiltiourasil dan metimazol. Manakah pernyataan yang paling tepat mengenai perbedaan efek perifer kedua obat tersebut?</p>
+
+                <div class="quiz-option" onclick="checkAnswer(this, 'q2', true)">
+                    <span>A.</span>
+                    <span>Metimazol memiliki masa kerja lebih panjang sehingga dapat diberikan satu kali sehari dan tidak menghambat konversi perifer T4 menjadi T3.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q2', false)">
+                    <span>B.</span>
+                    <span>Metimazol memiliki masa kerja lebih pendek sehingga harus diberikan tiga kali sehari dan menghambat konversi perifer T4 menjadi T3.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q2', false)">
+                    <span>C.</span>
+                    <span>Propiltiourasil tidak terikat protein plasma sehingga memiliki durasi kerja hingga 24 jam dan diberikan satu kali sehari.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q2', false)">
+                    <span>D.</span>
+                    <span>Propiltiourasil hanya menghambat enzim tiroperoksidase di kelenjar tiroid tanpa memengaruhi proses deiodinasi perifer T4 menjadi T3.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q2', false)">
+                    <span>E.</span>
+                    <span>Metimazol dan propiltiourasil memiliki farmakokinetik identik sehingga pilihan obat hanya didasarkan pada ketersediaan di apotek.</span>
+                </div>
+
+                <div class="explanation" id="exp-q2">
+                    <p><strong>✅ CORRECT ANSWER: A</strong></p>
+                    <p><strong>🧠 EXPLANATION:</strong> Metimazol memiliki masa kerja sekitar 24 jam sehingga cukup diberikan 1 kali sehari (once daily), tetapi Metimazol TIDAK menghambat deiodinasi perifer T4 menjadi T3. Sebaliknya, PTU memiliki durasi pendek (3x sehari) dan memiliki keunggulan tambahan berupa menghambat konversi perifer T4 menjadi T3.</p>
+                    <p><strong>❌ WHY THE OTHERS ARE WRONG:</strong> B salah karena Metimazol bermasa kerja panjang dan tidak hambat konversi perifer. C salah karena PTU terikat albumin 80-90% dan durasinya pendek. D salah karena PTU menghambat deiodinasi perifer. E salah karena profil farmakokinetik kedua obat sangat berbeda.</p>
+                    <p><strong>💡 EXAM PEARL:</strong> PTU = Hambat TPO + Hambat Konversi Perifer T4→T3. Metimazol = Hambat TPO saja (tapi 1x/hari).</p>
+                </div>
+            </div>
+
+            <!-- SOAL 3 -->
+            <div class="card" id="q3">
+                <h4>Soal 3: Manajemen Efek Samping Antitiroid</h4>
+                <p style="margin: 0.5rem 0 1rem 0;">Seorang pria berusia 40 tahun dengan penyakit Graves yang mengonsumsi propiltiourasil sejak 3 minggu lalu datang ke IGD dengan keluhan demam tinggi dan demam disertai nyeri tenggorokan hebat. Manakah langkah awal yang paling tepat dilakukan oleh dokter?</p>
+
+                <div class="quiz-option" onclick="checkAnswer(this, 'q3', true)">
+                    <span>A.</span>
+                    <span>Menghentikan obat antitiroid segera dan memeriksa hitung jenis leukosit total untuk mengevaluasi kemungkinan agranulositosis.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q3', false)">
+                    <span>B.</span>
+                    <span>Meningkatkan dosis propiltiourasil menjadi dua kali lipat untuk mengatasi reaksi peradangan lokal pada tenggorokan.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q3', false)">
+                    <span>C.</span>
+                    <span>Menambahkan sediaan suplementasi levotiroksin tanpa menghentikan pemberian propiltiourasil untuk mencegah timbulnya miksedema.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q3', false)">
+                    <span>D.</span>
+                    <span>Memindahkan terapi pasien secara langsung ke metimazol dosis tinggi tanpa perlu melakukan pemeriksaan darah tepi.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q3', false)">
+                    <span>E.</span>
+                    <span>Memberikan antibiotik spektrum luas oral sambil melanjutkan pemberian propiltiourasil sesuai dengan dosis pemeliharaan awal.</span>
+                </div>
+
+                <div class="explanation" id="exp-q3">
+                    <p><strong>✅ CORRECT ANSWER: A</strong></p>
+                    <p><strong>🧠 EXPLANATION:</strong> Gejala demam dan sore throat pada pasien yang menggunakan tioamid (PTU/Metimazol) merupakan warning sign terjadinya agranulositosis (efek samping fatal 0.1–0.5%). Tindakan wajib adalah menghentikan obat antitiroid segera dan memeriksa hitung leukosit (ANC).</p>
+                    <p><strong>❌ WHY THE OTHERS ARE WRONG:</strong> B, C, D, dan E salah karena membiarkan pasien tetap mengonsumsi tioamid saat dicurigai agranulositosis dapat berakibat fatal akibat infeksi berat.</p>
+                    <p><strong>💡 EXAM PEARL:</strong> Demam + Sore Throat pada pemakai Antitiroid = STOP OBAT + Cek Leukosit (Agranulositosis Rule Out).</p>
+                </div>
+            </div>
+
+            <!-- SOAL 4 -->
+            <div class="card" id="q4">
+                <h4>Soal 4: Farmakoterapi Substitusi Tiroid</h4>
+                <p style="margin: 0.5rem 0 1rem 0;">Seorang wanita berusia 52 tahun didiagnosis mengalami hipotiroidisme primer spontan. Dokter merencanakan pemberian terapi substitusi hormon tiroid jangka panjang. Manakah karakteristik farmakologi Levotiroksin yang mendukung pemilihannya sebagai lini pertama?</p>
+
+                <div class="quiz-option" onclick="checkAnswer(this, 'q4', true)">
+                    <span>A.</span>
+                    <span>Levotiroksin memiliki waktu paruh eliminasi sekitar tujuh hari sehingga cukup diberikan satu kali sehari pada saat perut kosong.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q4', false)">
+                    <span>B.</span>
+                    <span>Liotironin merupakan pilihan utama terapi pemeliharaan rutin hipotiroidisme karena memiliki waktu paruh eliminasi hingga sepuluh hari.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q4', false)">
+                    <span>C.</span>
+                    <span>Levotiroksin harus diminum bersama makanan tinggi kalsium atau antasida untuk meningkatkan penyerapan intestinalnya secara optimal.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q4', false)">
+                    <span>D.</span>
+                    <span>Liotironin tidak berisiko menyebabkan efek samping kardiovaskular sehingga sangat aman diberikan pada pasien lansia dengan PJK.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q4', false)">
+                    <span>E.</span>
+                    <span>Levotiroksin membutuhkan waktu dua hari untuk mencapai kadar stabil sehingga pemantauan TSH dilakukan setiap minggu.</span>
+                </div>
+
+                <div class="explanation" id="exp-q4">
+                    <p><strong>✅ CORRECT ANSWER: A</strong></p>
+                    <p><strong>🧠 EXPLANATION:</strong> Na-Levotiroksin (T4) memiliki waktu paruh panjang (~7 hari) yang memungkinkan kadar hormon stabil di plasma dengan regimen 1x sehari. Levotiroksin diminum dalam keadaan perut kosong untuk mencegah penurunan absorpsi.</p>
+                    <p><strong>❌ WHY THE OTHERS ARE WRONG:</strong> B salah karena Liotironin memiliki waktu paruh pendek (bukan 10 hari) dan bukan terapi rutin. C salah karena makanan/antasida/kalsium justru menurunkan absorpsi Levotiroksin. D salah karena Liotironin justru tinggi risiko efek samping kardiovaskular. E salah karena pemantauan TSH dilakukan 6-8 minggu kemudian (karena t1/2 = 7 hari).</p>
+                    <p><strong>💡 EXAM PEARL:</strong> Levotiroksin: t1/2 = 7 hari, 1x/hari perut kosong, evaluasi TSH tiap 6-8 minggu.</p>
+                </div>
+            </div>
+
+            <!-- SOAL 5 -->
+            <div class="card" id="q5">
+                <h4>Soal 5: Persiapan Pra-Bedah Tiroidektomi</h4>
+                <p style="margin: 0.5rem 0 1rem 0;">Seorang pasien pria berusia 35 tahun dengan struma toksik dijadwalkan untuk menjalani operasi tiroidektomi subtotal. Dokter memberikan sediaan larutan Lugol (yodida) sebelum pembedahan. Apakah tujuan utama pemberian obat tersebut pada periode pra-bedah?</p>
+
+                <div class="quiz-option" onclick="checkAnswer(this, 'q5', true)">
+                    <span>A.</span>
+                    <span>Memberikan larutan jenuh kalium yodida selama sepuluh hari pra-bedah untuk mengurangi ukuran dan vaskularitas kelenjar tiroid.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q5', false)">
+                    <span>B.</span>
+                    <span>Memberikan terapi yodium radioaktif satu hari sebelum operasi untuk memfasilitasi pemotongan jaringan tiroid oleh dokter bedah.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q5', false)">
+                    <span>C.</span>
+                    <span>Memberikan dosis tunggal liotironin intravena sesaat sebelum pembiusan untuk mencegah penurun basal metabolic rate saat operasi.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q5', false)">
+                    <span>D.</span>
+                    <span>Menghentikan seluruh obat antitiroid dan beta-blocker dua minggu sebelum pembedahan tanpa memberikan obat pengganti lainnya.</span>
+                </div>
+                <div class="quiz-option" onclick="checkAnswer(this, 'q5', false)">
+                    <span>E.</span>
+                    <span>Memberikan suplemen kalsium dosis tinggi dan vitamin D aktif selama dua minggu pra-bedah sebagai pengganti antitiroid.</span>
+                </div>
+
+                <div class="explanation" id="exp-q5">
+                    <p><strong>✅ CORRECT ANSWER: A</strong></p>
+                    <p><strong>🧠 EXPLANATION:</strong> Pemberian Yodida (Lugol / KI) dosis farmakologis selama 10 hari pra-bedah bertujuan untuk menghambat proteolisis tiroglobulin serta mengurangi vaskularitas dan ukuran kelenjar tiroid sehingga mempermudah prosedur bedah dan mengurangi risiko pendarahan intraoperatif.</p>
+                    <p><strong>❌ WHY THE OTHERS ARE WRONG:</strong> B, C, D, dan E tidak sesuai dengan protokol persiapan operasi tiroidektomi.</p>
+                    <p><strong>💡 EXAM PEARL:</strong> Yodida pra-operasi = 10 hari pra-bedah → kurangi vaskularitas & kerapuhan kelenjar tiroid.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Scroll Progress
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+        };
+
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-icon');
+            if(document.body.classList.contains('light-mode')) {
+                icon.textContent = '☀️';
+            } else {
+                icon.textContent = '🌙';
+            }
+        }
+
+        // Search Filter
+        function filterContent() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                let text = card.innerText.toLowerCase();
+                if(text.includes(input)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Collapsible Cards
+        function toggleCollapsible(header) {
+            const body = header.nextElementSibling;
+            body.classList.toggle('open');
+        }
+
+        // Quiz Handling
+        function checkAnswer(element, qId, isCorrect) {
+            const container = document.getElementById(qId);
+            const options = container.querySelectorAll('.quiz-option');
+            const exp = document.getElementById('exp-' + qId);
+
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+
+            if (isCorrect) {
+                element.classList.add('correct');
+            } else {
+                element.classList.add('wrong');
+                options.forEach(opt => {
+                    if (opt.getAttribute('onclick').includes('true')) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+
+            exp.classList.add('visible');
+        }
+    </script>
+</body>
+</html>
